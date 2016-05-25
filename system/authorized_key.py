@@ -146,7 +146,6 @@ EXAMPLES = '''
 #
 # see example in examples/playbooks
 
-import sys
 import os
 import pwd
 import os.path
@@ -214,7 +213,7 @@ def keyfile(module, user, write=False, path=None, manage_dir=True):
 
     if manage_dir:
         if not os.path.exists(sshdir):
-            os.mkdir(sshdir, int('0700', 8))
+            os.makedirs(sshdir, int('0700', 8))
             if module.selinux_enabled():
                 module.set_default_selinux_context(sshdir, False)
         os.chown(sshdir, uid, gid)
@@ -223,7 +222,8 @@ def keyfile(module, user, write=False, path=None, manage_dir=True):
     if not os.path.exists(keysfile):
         basedir = os.path.dirname(keysfile)
         if not os.path.exists(basedir):
-            os.makedirs(basedir)
+            module.fail_json(msg="Can't find the parent directory of the authorized_keys file. Maybe you need to set manager_dir=yes")
+
         try:
             f = open(keysfile, "w") #touches file so we can set ownership and perms
         finally:
